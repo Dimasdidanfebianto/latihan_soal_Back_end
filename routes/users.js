@@ -5,6 +5,6 @@ var router = express.Router ()
 
 
 
-router.post('/', addUser);
+router.post("", addUser);
 
 module.exports = router;

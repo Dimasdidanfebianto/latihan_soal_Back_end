@@ -15,7 +15,7 @@ dotenv.config();
 const PORT = process.env.PORT || 4000;
 
 
-app.use('/api/users/', userRouter);
+app.use('/api/users', userRouter);
 app.use((err, req, res, next) => {
     console.log(err);
     res.status(500).send('Internal Server Error');
