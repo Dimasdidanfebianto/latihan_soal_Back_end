@@ -1,4 +1,6 @@
+
 const express = require ('express');
+const { Op } = require('sequelize');
 const catchAsync = require('../util/cathAsync');
 const { createUser } = require('../services/user');
 const { User } = require('../../database/models');
@@ -55,30 +57,79 @@ exports.modifyUser = catchAsync(async(req, res) =>{
     })
 })
 
-exports.getAllUsers = catchAsync(async(req, res) => {
-    const { page = 1 , limit  = 10, username = ''} = req.query;
-    const offset = (page -1 ) * limit;
-
+exports.getAllUsers = catchAsync(async (req, res) => {
+    const { page = 1, limit = 10, username = '' } = req.query;
+    const offset = (page - 1) * limit;
 
     const whereCondition = {};
+
     if (username) {
-        whereCondition['$username$'] = {[Op.iLike]: `%${username}%`}   
-        
+        whereCondition['username'] = { [Op.iLike]: `%${username}%` };
+    }
+
     const users = await User.findAndCountAll({
         where: whereCondition,
         limit: Number(limit),
         offset: Number(offset)
     });
-    
+
     if (users) {
         res.status(200).json({
             status: true,
-            message: 'Succes Get all users',
+            message: 'Success Get all users',
             users: users
-        })
+        });
+    } else {
+        res.status(404).json({
+            status: false,
+            message: 'No users found',
+        });
+    }
+});
+
+
+exports.getUserByid = catchAsync(async(req, res) =>{
+    const user = await User.findOne({
+        where: {
+            id: req.params.id,
+        }
+    });
+
+    if (user) {
+        res.status(200).json({
+            status: true,
+            user: user,
+        });
+    } else {
+        res.status(404).json({
+            status: false,
+            message: 'User not found',
+        });
     }
 
-}})
+})
+
+
+exports.deletUser = catchAsync(async(req, res) =>{
+    const user = await User.destroy({
+        where: {
+            id: req.params.id,
+        }
+    });
+
+    if (user) {
+        res.status(200).json({
+            status: true,
+            message: 'User has been deleted',
+        });
+    } else {
+        res.status(404).json({
+            status: false,
+            message: 'User not found',
+        });
+    }
+})
+
 const router = express.Router();
 
 
